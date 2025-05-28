@@ -3,6 +3,7 @@ use dioxus::prelude::*;
 use reqwest::{Client, StatusCode};
 use serde::Serialize;
 use crate::patient_list;
+use uuid;
 
 #[derive(serde::Serialize, Clone, PartialEq)]
 struct PaperDispatch {
@@ -57,7 +58,20 @@ struct PaperDispatch {
     #[serde(rename = "prescribedByGivenName")]
     prescribed_by_given_name: String,
     #[serde(rename = "prescribedByFamilyName")]
-    prescribed_by_family_name: String
+    prescribed_by_family_name: String,
+    /* */
+    #[serde(rename = "dispatcherHerId")]
+    dispatcher_her_id: String,
+    #[serde(rename = "dispatcherName")]
+    dispatcher_name: String,
+    /* */ 
+    #[serde(rename = "substitutionReservationCustomer")]
+    substitution_reservation_customer: bool,
+    #[serde(rename = "dispatchMsgId")]
+    dispatch_msg_id: String,
+    quantity: f64,
+    #[serde(rename = "whenHandedOver")]
+    when_handed_over: String
 }
 
 #[non_exhaustive]
@@ -74,6 +88,7 @@ async fn submit_dispatch(base_url: String, patient_id: String) -> Result<StatusC
                                   timestamp % 10000,
                                   timestamp % 1000000
     );
+    
     let paper_dispatch =
         PaperDispatch {
             prescription_group: "C".to_string(),
@@ -103,6 +118,12 @@ async fn submit_dispatch(base_url: String, patient_id: String) -> Result<StatusC
             prescribed_by_hpr: "222200063".to_string(),
             prescribed_by_given_name: "Rolf Fos".to_string(),
             prescribed_by_family_name: "Lillehagen".to_string(),
+            dispatcher_her_id: "8090732".to_string(),
+            dispatcher_name: "Apoteket Vågen".to_string(),
+            substitution_reservation_customer: false,
+            dispatch_msg_id: uuid::Uuid::from_u64_pair(timestamp as u64, timestamp as u64).to_string(),
+            quantity: 1.0,
+            when_handed_over: chrono::Local::now().format("%Y-%m-%d").to_string()
         };
     let response = Client::builder().build().expect("failed to build client")
         .put(url)
